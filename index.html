@@ -3,28 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Laboratorium Fisika: Kinematika & Dinamika</title>
+    <title>Physics Lab: Validasi Rumus</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <h1>Physics Lab: Projectile Motion</h1>
-    <p class="subtitle">Simulasi Gerak Parabola Real-Time</p>
+    <p class="subtitle">Mode Kalibrasi & Validasi Manual</p>
 
     <div id="game-container">
       <canvas id="gameCanvas" width="800" height="400"></canvas>
+      <div
+        id="offScreenWarning"
+        style="
+          display: none;
+          position: absolute;
+          top: 50%;
+          right: 10px;
+          color: red;
+          font-weight: bold;
+          background: rgba(0, 0, 0, 0.8);
+          padding: 5px;
+        "
+      >
+        >>> DI LUAR LAYAR >>>
+      </div>
     </div>
 
     <div id="controls">
       <div class="control-group">
         <label for="angle">Sudut (°)</label>
-        <input type="range" id="angle" min="0" max="90" value="45" />
-        <span id="angleVal">45°</span>
+        <input type="range" id="angle" min="0" max="90" value="30" />
+        <span id="angleVal">30°</span>
       </div>
 
       <div class="control-group">
         <label for="power">Kecepatan Awal (v₀)</label>
-        <input type="range" id="power" min="10" max="150" value="85" />
-        <span id="powerVal">85 m/s</span>
+        <input type="range" id="power" min="10" max="150" value="100" />
+        <span id="powerVal">100 m/s</span>
       </div>
 
       <div class="control-group">
@@ -34,9 +49,9 @@
       </div>
 
       <div class="control-group">
-        <label for="drag">Hambatan Udara</label>
-        <input type="range" id="drag" min="0" max="100" value="20" step="5" />
-        <span id="dragVal">0.020</span>
+        <label for="drag" style="color: #ff9800">Hambatan Udara (C)</label>
+        <input type="range" id="drag" min="0" max="100" value="0" step="1" />
+        <span id="dragVal">0.000 (VAKUM)</span>
       </div>
 
       <div class="control-group">
@@ -45,16 +60,16 @@
           type="range"
           id="gravity"
           min="1"
-          max="25"
+          max="20"
           step="0.1"
-          value="9.8"
+          value="10.0"
         />
-        <span id="gravityVal">9.8 m/s²</span>
+        <span id="gravityVal">10.0 m/s²</span>
       </div>
 
       <div class="button-group">
-        <button id="btn-fire">Tembak!</button>
-        <button id="btn-reset" class="btn-reset">Reset Target</button>
+        <button id="btn-fire">Tembak (Uji Coba)</button>
+        <button id="btn-reset" class="btn-reset">Reset</button>
       </div>
 
       <div
@@ -69,7 +84,7 @@
             margin-bottom: 5px;
           "
         >
-          HASIL AKHIR:
+          DATA PENERBANGAN:
         </div>
         <div style="font-size: 0.85rem; line-height: 1.6">
           <div>
@@ -80,14 +95,14 @@
             s
           </div>
           <div>
-            Jarak Terjauh (X):
+            Jarak (Range):
             <span id="resRange" style="color: white; font-weight: bold"
               >0.00</span
             >
             m
           </div>
           <div>
-            Tinggi Maks (Y):
+            Tinggi Maks (H):
             <span id="resHeight" style="color: white; font-weight: bold"
               >0.00</span
             >
@@ -97,7 +112,7 @@
       </div>
     </div>
 
-    <div class="stats" id="statusMessage">Siap simulasi.</div>
+    <div class="stats" id="statusMessage">Siap. Mode VAKUM aktif.</div>
 
     <script src="script.js"></script>
   </body>
