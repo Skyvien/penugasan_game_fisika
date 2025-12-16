@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Physics Lab: Validasi Rumus</title>
+    <title>Physics Lab: Validasi Teoritis</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Physics Lab: Projectile Motion</h1>
-    <p class="subtitle">Mode Kalibrasi & Validasi Manual</p>
+    <h1>Physics Lab: Theoretical Verification</h1>
+    <p class="subtitle">Mode Partikel Titik (Point Particle)</p>
 
     <div id="game-container">
       <canvas id="gameCanvas" width="800" height="400"></canvas>
@@ -49,7 +49,7 @@
       </div>
 
       <div class="control-group">
-        <label for="drag" style="color: #ff9800">Hambatan Udara (C)</label>
+        <label for="drag" style="color: #ff9800">Hambatan Udara</label>
         <input type="range" id="drag" min="0" max="100" value="0" step="1" />
         <span id="dragVal">0.000 (VAKUM)</span>
       </div>
@@ -68,7 +68,7 @@
       </div>
 
       <div class="button-group">
-        <button id="btn-fire">Tembak (Uji Coba)</button>
+        <button id="btn-fire">Tembak (Uji Manual)</button>
         <button id="btn-reset" class="btn-reset">Reset</button>
       </div>
 
@@ -84,7 +84,7 @@
             margin-bottom: 5px;
           "
         >
-          DATA PENERBANGAN:
+          DATA PRESISI:
         </div>
         <div style="font-size: 0.85rem; line-height: 1.6">
           <div>
