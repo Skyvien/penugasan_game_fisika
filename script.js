@@ -17,7 +17,8 @@ let flightData = {
 };
 
 // --- Physics Constants ---
-const DT = 0.05; // Time Step diperkecil (0.05) agar hasil lebih presisi mendekati manual
+// KUNCI PRESISI: Time Step sangat kecil (0.01 detik)
+const DT = 0.01;
 
 // --- DOM Elements ---
 const angleInput = document.getElementById("angle");
@@ -57,7 +58,6 @@ function resetTarget() {
   target.y = canvas.height - target.height;
   path = [];
 
-  // Reset Hasil
   document.getElementById("resTime").innerText = "0.00";
   document.getElementById("resRange").innerText = "0.00";
   document.getElementById("resHeight").innerText = "0.00";
@@ -73,16 +73,10 @@ function fireProjectile() {
   const angleRad = (angleInput.value * Math.PI) / 180;
   const velocity = parseFloat(powerInput.value);
 
-  // Debugging di Console (Cek Validitas Data)
-  console.log("--- MULAI TEMBAKAN BARU ---");
-  console.log("Sudut:", angleInput.value);
-  console.log("Kecepatan:", velocity);
-  console.log("Drag Slider:", dragInput.value);
-  console.log("Gravitasi:", gravityInput.value);
-
-  // Posisi Awal
+  // LOGIKA START: Mulai dari GARIS TANAH (y = canvas.height)
+  // Bukan (canvas.height - 20). Kita anggap meriam ditanam di tanah.
   projectile.x = 20;
-  projectile.y = canvas.height - 20;
+  projectile.y = canvas.height;
 
   projectile.vx = velocity * Math.cos(angleRad);
   projectile.vy = -velocity * Math.sin(angleRad);
@@ -96,16 +90,18 @@ function fireProjectile() {
 
   projectile.active = true;
   path = [];
-  statusMsg.innerText = "Menghitung lintasan...";
+  statusMsg.innerText = "Menghitung lintasan teoritis...";
   loop();
 }
 
 function loop() {
   if (!projectile.active) return;
 
-  // Panggil logika fisika berulang kali dalam satu frame agar lebih cepat & akurat
-  // (Sub-stepping)
-  updatePhysicsRigorous();
+  // Sub-stepping: Lakukan perhitungan fisika 5x per frame
+  // Ini membuat simulasi sangat halus dan akurat
+  for (let i = 0; i < 5; i++) {
+    if (projectile.active) updatePhysicsRigorous();
+  }
 
   draw();
 
@@ -119,33 +115,30 @@ function updatePhysicsRigorous() {
   const dragSlider = parseFloat(dragInput.value);
   const g = parseFloat(gravityInput.value);
 
-  // 1. Hitung Speed
   const speed = Math.sqrt(
     projectile.vx * projectile.vx + projectile.vy * projectile.vy
   );
 
-  // 2. Hitung Gaya Hambat
-  // Jika slider 0, paksa dragForce jadi 0 murni
+  // Hitung Gaya Hambat
   let dragForce = 0;
   if (dragSlider > 0) {
     const dragCoeff = dragSlider / 1000;
     dragForce = dragCoeff * speed * speed;
   }
 
-  // 3. Uraikan Gaya Hambat
+  // Uraikan Gaya Hambat
   let F_drag_x = 0;
   let F_drag_y = 0;
-
   if (speed > 0 && dragForce > 0) {
     F_drag_x = dragForce * (projectile.vx / speed);
     F_drag_y = dragForce * (projectile.vy / speed);
   }
 
-  // 4. Hitung Percepatan (Newton II)
+  // Hitung Percepatan (Newton II)
   const ax = -F_drag_x / mass;
   const ay = g + -F_drag_y / mass;
 
-  // 5. Update Posisi & Kecepatan
+  // Integrasi Euler
   projectile.vx += ax * DT;
   projectile.vy += ay * DT;
 
@@ -155,43 +148,44 @@ function updatePhysicsRigorous() {
   // --- Pencatatan Data ---
   flightData.timer += DT;
 
-  // Cek Titik Tertinggi
+  // Cek Titik Tertinggi (Y=CanvasHeight adalah 0 meter)
   let currentRealHeight = canvas.height - projectile.y;
   if (currentRealHeight > flightData.maxHeight) {
     flightData.maxHeight = currentRealHeight;
   }
 
   // Jejak Visual
+  // Simpan lebih jarang agar tidak berat karena kita pakai sub-stepping
   if (
     path.length === 0 ||
-    Math.abs(projectile.x - path[path.length - 1].x) > 5
+    Math.abs(projectile.x - path[path.length - 1].x) > 2
   ) {
     path.push({ x: projectile.x, y: projectile.y });
   }
 
-  // Cek Keluar Layar (Visual Warning saja, JANGAN stop simulasi)
+  // Cek Visual Luar Layar
   if (projectile.x > canvas.width) {
     warningBox.style.display = "block";
   }
 
-  // BATAS TANAH (STOP SIMULASI DI SINI)
-  // Tanah ada di y = canvas.height
-  if (projectile.y >= canvas.height - projectile.radius) {
-    // Koreksi posisi agar pas di tanah
-    projectile.y = canvas.height - projectile.radius;
+  // --- LOGIKA PENDARATAN TEORITIS ---
+  // Berhenti tepat saat y >= canvas.height (Garis Tanah)
+  // Kita abaikan radius bola agar hitungan menjadi "Partikel Titik"
+  if (projectile.y >= canvas.height) {
+    projectile.y = canvas.height; // Snap ke garis
     projectile.active = false;
     flightData.landed = true;
 
-    // Catat jarak akhir (Posisi X saat ini - Posisi Awal 20)
     flightData.finalRange = projectile.x - 20;
 
     displayResults();
-    statusMsg.innerText = "Pendaratan Selesai. Data tercatat.";
+    statusMsg.innerText = "Selesai. Bandingkan dengan rumus.";
     warningBox.style.display = "none";
   }
 }
 
 function displayResults() {
+  // Tampilkan data presisi
   document.getElementById("resTime").innerText = flightData.timer.toFixed(2);
   document.getElementById("resRange").innerText =
     flightData.finalRange.toFixed(2);
@@ -202,45 +196,42 @@ function displayResults() {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Tanah
+  // 1. Gambar Tanah
   ctx.fillStyle = "#333";
   ctx.fillRect(0, canvas.height - 2, canvas.width, 2);
 
-  // Target (Hanya gambar jika target ada dalam layar)
+  // 2. Gambar Target (Hanya jika di layar)
   if (target.x < canvas.width) {
     ctx.fillStyle = "#e91e63";
     ctx.fillRect(target.x, target.y, target.width, target.height);
   }
 
-  // Jejak Lintasan
+  // 3. Gambar Jejak Lintasan
   ctx.beginPath();
   ctx.strokeStyle = "rgba(0, 188, 212, 0.5)";
   ctx.lineWidth = 2;
   if (path.length > 0) {
-    // Kita geser visualnya jika bola sudah jauh sekali (opsional, tapi biarkan statis dulu)
     ctx.moveTo(path[0].x, path[0].y);
     for (let p of path) {
-      // Hanya gambar jejak yang masuk akal di layar
-      if (p.x < canvas.width + 50) {
-        ctx.lineTo(p.x, p.y);
-      }
+      // Hanya gambar garis yang ada di dalam layar agar tidak berat
+      if (p.x < canvas.width + 50) ctx.lineTo(p.x, p.y);
     }
   }
   ctx.stroke();
 
-  // Meriam
+  // 4. Gambar Meriam
   ctx.save();
-  ctx.translate(20, canvas.height - 20);
+  ctx.translate(20, canvas.height - 10);
   const angleRad = (angleInput.value * Math.PI) / 180;
   ctx.rotate(-angleRad);
   ctx.fillStyle = "#bbb";
   ctx.fillRect(0, -5, 40, 10);
   ctx.restore();
 
-  // Proyektil (Hanya gambar jika masih di dalam layar)
+  // 5. Gambar Bola (HANYA JIKA DI DALAM LAYAR)
   if (
     (projectile.active || flightData.landed) &&
-    projectile.x < canvas.width + 10
+    projectile.x < canvas.width + 20
   ) {
     ctx.beginPath();
     ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
@@ -249,12 +240,20 @@ function draw() {
     ctx.closePath();
   }
 
-  // HUD Real-Time
-  ctx.fillStyle = "white";
-  ctx.font = "14px monospace";
-  let realX = (projectile.x - 20).toFixed(1);
-  let realY = (canvas.height - projectile.y).toFixed(1);
-  ctx.fillText(`X: ${realX}m | Y: ${realY}m`, 10, 20);
+  // 6. --- PERBAIKAN DI SINI ---
+  // Gambar HUD Teks (SELALU MUNCUL, meskipun bola keluar layar)
+  if (projectile.active || flightData.landed) {
+    ctx.fillStyle = "white";
+    ctx.font = "14px monospace";
+
+    // Hitung koordinat
+    let realX = (projectile.x - 20).toFixed(1);
+    let realY = (canvas.height - projectile.y).toFixed(1);
+
+    // Tampilkan teks di pojok kiri atas
+    ctx.fillText(`Posisi X: ${realX} m`, 10, 20);
+    ctx.fillText(`Posisi Y: ${realY} m`, 10, 40);
+  }
 }
 
 // Init
