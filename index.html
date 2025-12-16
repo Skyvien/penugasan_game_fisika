@@ -4,11 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Laboratorium Fisika: Kinematika & Dinamika</title>
-
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Penugasan fisika</h1>
+    <h1>Physics Lab: Projectile Motion</h1>
     <p class="subtitle">
       Simulasi Gerak Parabola dengan Hambatan Udara & Massa
     </p>
@@ -25,10 +24,10 @@
       </div>
 
       <div class="control-group">
-            <label for="power">Kecepatan Awal (v₀)</label>
-            <input type="range" id="power" min="10" max="150" value="85">
-            <span id="powerVal">85 m/s</span>
-        </div>
+        <label for="power">Kecepatan Awal (v₀)</label>
+        <input type="range" id="power" min="10" max="150" value="85" />
+        <span id="powerVal">85 m/s</span>
+      </div>
 
       <div class="control-group">
         <label for="mass">Massa (kg)</label>
@@ -46,6 +45,45 @@
         <button id="btn-fire">Tembak!</button>
         <button id="btn-reset" class="btn-reset">Reset Target</button>
       </div>
+
+      <div
+        class="results-panel"
+        style="margin-top: 15px; border-top: 1px solid #555; padding-top: 10px"
+      >
+        <div
+          style="
+            font-size: 0.9rem;
+            color: #00bcd4;
+            font-weight: bold;
+            margin-bottom: 5px;
+          "
+        >
+          HASIL PENGUKURAN:
+        </div>
+        <div style="font-size: 0.85rem; line-height: 1.6">
+          <div>
+            Waktu Terbang:
+            <span id="resTime" style="color: white; font-weight: bold"
+              >0.00</span
+            >
+            s
+          </div>
+          <div>
+            Jarak Terjauh (X):
+            <span id="resRange" style="color: white; font-weight: bold"
+              >0.00</span
+            >
+            m
+          </div>
+          <div>
+            Tinggi Maks (Y):
+            <span id="resHeight" style="color: white; font-weight: bold"
+              >0.00</span
+            >
+            m
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="stats" id="statusMessage">
@@ -55,5 +93,3 @@
     <script src="script.js"></script>
   </body>
 </html>
-
-
